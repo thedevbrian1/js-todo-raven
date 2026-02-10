@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TODO</title>
+    <link rel="stylesheet" href="src/output.css" />
+  </head>
+  <body>
+    <main class="max-w-xl mx-auto mt-20">
+      <form method="post" id="new-todo-form">
+        <!-- <label for="" class="hidden">Create todo</label> -->
+        <div class="flex gap-4 items-center bg-slate-900 p-5">
+          <input type="checkbox" name="" id="" disabled />
+          <input
+            type="text"
+            name="new-todo-input"
+            aria-label="Create new todo item"
+            placeholder="Create new todo"
+            class="text-white w-full"
+          />
+        </div>
+      </form>
+      <div class="bg-slate-900 text-gray-200">
+        <ul class="divide-y divide-gray-600" id="todo-items">
+          <!-- <li class="flex gap-4 items-center p-5">
+          <input type="checkbox" name="todo-item" id="todo-item" class="peer" />
+          <label
+            for="todo-item"
+            class="peer-checked:line-through peer-checked:text-gray-600"
+            >Complete online course</label
+          >
+        </li> -->
+        </ul>
+        <div
+          class="flex items-center justify-between gap-4 mt-4 p-5 text-gray-500"
+        >
+          <p>5 items left</p>
+          <form method="post" id="toggle-form">
+            <div class="flex gap-2">
+              <input type="radio" name="toggle-state" id="all" value="all" />
+              <label for="all">All</label>
+
+              <input
+                type="radio"
+                name="toggle-state"
+                id="active"
+                value="active"
+              />
+              <label for="active">Active</label>
+
+              <input
+                type="radio"
+                name="toggle-state"
+                id="completed"
+                value="completed"
+              />
+              <label for="completed">Completed</label>
+
+              <!-- <button class="hover:text-gray-300">All</button>
+              <button class="hover:text-gray-300">Active</button>
+              <button class="hover:text-gray-300">Completed</button> -->
+            </div>
+          </form>
+          <button>Clear completed</button>
+        </div>
+      </div>
+    </main>
+    <script>
+      // Get the user inputs
+      // Store the inputs in an array
+      // Create the list item
+      // Add the list item to the ul
+
+      let todoItems = document.getElementById("todo-items");
+      let newTodoForm = document.getElementById("new-todo-form");
+      let toggleForm = document.getElementById("toggle-form");
+
+      let newTodoItems = [];
+      let filtered;
+
+      function toggleComplete(event) {
+        // Find the input obj that matches the id provided and toggle its isComplete status
+        console.log(event.target);
+        let checkedInputId = event.target.id;
+        console.log({ checkedInputId });
+
+        let matchedObj = newTodoItems.find(
+          (item) => item.id === checkedInputId,
+        );
+        console.log({ matchedObj });
+
+        matchedObj.isComplete = !matchedObj.isComplete;
+        console.log({ newTodoItems });
+      }
+
+      newTodoForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        // Get user input
+        let formData = new FormData(newTodoForm);
+        let newTodoInput = formData.get("new-todo-input");
+
+        console.log({ newTodoInput });
+
+        // Store the input in an array
+        newTodoItems.push({
+          todoItem: newTodoInput,
+          isComplete: false,
+          id: `todo-item-${newTodoItems.length + 1}`,
+        });
+
+        console.log({ newTodoItems });
+
+        // Create list item
+        let li = document.createElement("li");
+        li.className = "flex gap-4 items-center p-5";
+
+        let todoItemCheckbox = document.createElement("input");
+        todoItemCheckbox.setAttribute("type", "checkbox");
+        todoItemCheckbox.setAttribute(
+          "name",
+          `todo-item-${newTodoItems.length}`,
+        );
+        todoItemCheckbox.setAttribute("id", `todo-item-${newTodoItems.length}`);
+        todoItemCheckbox.className = "peer";
+        todoItemCheckbox.addEventListener("change", (event) =>
+          toggleComplete(event),
+        );
+
+        let label = document.createElement("label");
+        label.setAttribute("for", `todo-item-${newTodoItems.length}`);
+        label.textContent = newTodoInput;
+        label.className =
+          "peer-checked:line-through peer-checked:text-gray-600";
+
+        li.append(todoItemCheckbox);
+        li.append(label);
+        todoItems.append(li);
+
+        newTodoForm.reset();
+      });
+
+      toggleForm.addEventListener("change", (event) => {
+        console.log("Changed");
+        let formData = new FormData(toggleForm);
+        let toggleState = formData.get("toggle-state");
+        console.log({ toggleState });
+
+        // Filter todo items array based on the selected state
+        if (toggleState === "active") {
+          filtered = newTodoItems.filter((item) => item.isComplete === false);
+        } else if (toggleState === "completed") {
+          filtered = newTodoItems.filter((item) => item.isComplete === true);
+        } else if (toggleState === "all") {
+          filtered = newTodoItems;
+        }
+
+        console.log({ filtered });
+      });
+    </script>
+  </body>
+</html>
