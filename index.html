@@ -7,9 +7,8 @@
     <link rel="stylesheet" href="src/output.css" />
   </head>
   <body>
-    <main class="max-w-xl mx-auto mt-20">
+    <main class="max-w-2xl mx-auto mt-20">
       <form method="post" id="new-todo-form">
-        <!-- <label for="" class="hidden">Create todo</label> -->
         <div class="flex gap-4 items-center bg-slate-900 p-5">
           <input type="checkbox" name="" id="" disabled />
           <input
@@ -23,8 +22,6 @@
       </form>
       <div class="bg-slate-900 text-gray-200">
         <ul class="divide-y divide-gray-600" id="todo-items">
-          <!-- TODO: Display filtered list -->
-
           <!-- <li class="flex gap-4 items-center p-5">
           <input type="checkbox" name="todo-item" id="todo-item" class="peer" />
           <label
@@ -39,29 +36,35 @@
         >
           <p>5 items left</p>
           <form method="post" id="toggle-form">
-            <div class="flex gap-2">
-              <input type="radio" name="toggle-state" id="all" value="all" />
-              <label for="all">All</label>
+            <div class="flex gap-4">
+              <div>
+                <input type="radio" name="toggle-state" id="all" value="all" />
+                <label for="all">All (<span id="all-count">0</span>)</label>
+              </div>
 
-              <input
-                type="radio"
-                name="toggle-state"
-                id="active"
-                value="active"
-              />
-              <label for="active">Active</label>
+              <div>
+                <input
+                  type="radio"
+                  name="toggle-state"
+                  id="active"
+                  value="active"
+                />
+                <label for="active"
+                  >Active (<span id="active-count">0</span>)</label
+                >
+              </div>
 
-              <input
-                type="radio"
-                name="toggle-state"
-                id="completed"
-                value="completed"
-              />
-              <label for="completed">Completed</label>
-
-              <!-- <button class="hover:text-gray-300">All</button>
-              <button class="hover:text-gray-300">Active</button>
-              <button class="hover:text-gray-300">Completed</button> -->
+              <div>
+                <input
+                  type="radio"
+                  name="toggle-state"
+                  id="completed"
+                  value="completed"
+                />
+                <label for="completed"
+                  >Completed (<span id="completed-count">0</span>)</label
+                >
+              </div>
             </div>
           </form>
           <button>Clear completed</button>
@@ -77,9 +80,49 @@
       let todoItems = document.getElementById("todo-items");
       let newTodoForm = document.getElementById("new-todo-form");
       let toggleForm = document.getElementById("toggle-form");
+      let allCount = document.getElementById("all-count");
+      let activeCount = document.getElementById("active-count");
+      let completedCount = document.getElementById("completed-count");
 
       let newTodoItems = [];
-      let filtered;
+      let filtered = newTodoItems;
+
+      function showList() {
+        // Create list item
+
+        todoItems.innerHTML = "";
+
+        filtered.forEach((item) => {
+          let li = document.createElement("li");
+          li.className = "flex gap-4 items-center p-5";
+
+          let todoItemCheckbox = document.createElement("input");
+          todoItemCheckbox.setAttribute("type", "checkbox");
+          todoItemCheckbox.setAttribute("name", `${item.id}`);
+          todoItemCheckbox.setAttribute("id", `${item.id}`);
+          todoItemCheckbox.className = "peer";
+          todoItemCheckbox.addEventListener("change", (event) =>
+            toggleComplete(event),
+          );
+
+          // If the todo item is complete, mark it as complete by adding the checked state
+          if (item.isComplete) {
+            todoItemCheckbox.checked = true;
+          }
+
+          let label = document.createElement("label");
+          label.setAttribute("for", `${item.id}`);
+          label.textContent = item.todoItem;
+          label.className =
+            "peer-checked:line-through peer-checked:text-gray-600";
+
+          li.append(todoItemCheckbox);
+          li.append(label);
+          todoItems.append(li);
+
+          allCount.textContent = newTodoItems.length;
+        });
+      }
 
       function toggleComplete(event) {
         // Find the input obj that matches the id provided and toggle its isComplete status
@@ -114,35 +157,12 @@
 
         console.log({ newTodoItems });
 
-        // Create list item
-        let li = document.createElement("li");
-        li.className = "flex gap-4 items-center p-5";
-
-        let todoItemCheckbox = document.createElement("input");
-        todoItemCheckbox.setAttribute("type", "checkbox");
-        todoItemCheckbox.setAttribute(
-          "name",
-          `todo-item-${newTodoItems.length}`,
-        );
-        todoItemCheckbox.setAttribute("id", `todo-item-${newTodoItems.length}`);
-        todoItemCheckbox.className = "peer";
-        todoItemCheckbox.addEventListener("change", (event) =>
-          toggleComplete(event),
-        );
-
-        let label = document.createElement("label");
-        label.setAttribute("for", `todo-item-${newTodoItems.length}`);
-        label.textContent = newTodoInput;
-        label.className =
-          "peer-checked:line-through peer-checked:text-gray-600";
-
-        li.append(todoItemCheckbox);
-        li.append(label);
-        todoItems.append(li);
+        showList();
 
         newTodoForm.reset();
       });
 
+      // Filter the list according to the status of the todo item
       toggleForm.addEventListener("change", (event) => {
         console.log("Changed");
         let formData = new FormData(toggleForm);
@@ -152,13 +172,19 @@
         // Filter todo items array based on the selected state
         if (toggleState === "active") {
           filtered = newTodoItems.filter((item) => item.isComplete === false);
+          activeCount.textContent = filtered.length;
         } else if (toggleState === "completed") {
           filtered = newTodoItems.filter((item) => item.isComplete === true);
+          completedCount.textContent = filtered.length;
         } else if (toggleState === "all") {
           filtered = newTodoItems;
         }
 
         console.log({ filtered });
+
+        // Update the list (UI)
+
+        showList();
       });
     </script>
   </body>
